@@ -1,5 +1,10 @@
 public enum TaskStatus {
     NEW,
     IN_PROGRESS,
-    DONE
+    DONE;
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }
