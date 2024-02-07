@@ -1,15 +1,20 @@
 import java.util.Objects;
 
 public class Task {
-    private int id;
+    private static int id = 0;
     private String name;
+    private TaskStatus taskStatus;
+    private String description;
+
+    public Task(String name, String description) {
+        this.id++;
+        this.name = name;
+        this.description = description;
+        this.taskStatus = TaskStatus.NEW;
+    }
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -18,6 +23,22 @@ public class Task {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public TaskStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
