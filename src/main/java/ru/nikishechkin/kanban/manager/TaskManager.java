@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.controller;
+package ru.nikishechkin.kanban.manager;
 
 import ru.nikishechkin.kanban.model.Epic;
 import ru.nikishechkin.kanban.model.SubTask;
@@ -65,7 +65,7 @@ public class TaskManager {
         subTasks.clear();
         // Очищаем все списки подзадач у эпиков, поскольку их больше нет
         for (Epic epic : getEpics()) {
-            epic.getListSubTasksIds().clear();
+            epic.getSubTasksIds().clear();
         }
     }
 
@@ -213,11 +213,11 @@ public class TaskManager {
         // Проверка, что у подзадачи изменился связанный с ней эпик
         // Если связанный эпик не содержит в своем списке идентификаторов подзадач данной подзадачи
         Epic epic = epics.get(subTask.getEpicId());
-        if (!epic.getListSubTasksIds().contains(subTaskId)) {
+        if (!epic.getSubTasksIds().contains(subTaskId)) {
 
             // Находим, к какому эпику принадлежала ранее данная подзадача и удаляем ее из коллекции
             for (Epic ep : epics.values()) {
-                ep.getListSubTasksIds().remove(subTaskId);
+                ep.getSubTasksIds().remove(subTaskId);
             }
 
             epic.addSubTask(subTaskId);
@@ -248,7 +248,7 @@ public class TaskManager {
         }
 
         // Удаление входящих в эпик подзадач
-        for (Integer subTaskId : epic.getListSubTasksIds()) {
+        for (Integer subTaskId : epic.getSubTasksIds()) {
             subTasks.remove(subTaskId);
         }
 
@@ -272,7 +272,7 @@ public class TaskManager {
         // Удаление подзадачи у связанного с ней эпика
         Epic epic = epics.get(subTask.getEpicId());
         if (epic != null) {
-            epic.getListSubTasksIds().remove(id);
+            epic.getSubTasksIds().remove(id);
         }
 
         // Обновление статуса эпика после удаления одной из подзадач
@@ -305,7 +305,7 @@ public class TaskManager {
             return null;
         }
 
-        for (Integer subTaskId : epic.getListSubTasksIds()) {
+        for (Integer subTaskId : epic.getSubTasksIds()) {
             epicSubTasks.add(subTasks.get(subTaskId));
         }
         return epicSubTasks;
@@ -321,7 +321,7 @@ public class TaskManager {
             return;
         }
 
-        if (epic.getListSubTasksIds().size() == 0) {
+        if (epic.getSubTasksIds().size() == 0) {
             epic.setStatus(TaskStatus.NEW);
             return;
         }
@@ -332,7 +332,7 @@ public class TaskManager {
         // Флаг, сигнализирующий о том, что все задачи эпика являются решенными
         boolean allDone = true;
 
-        for (Integer subTaskId : epic.getListSubTasksIds()) {
+        for (Integer subTaskId : epic.getSubTasksIds()) {
             // Если хотя бы у одной задачи статус не Новой, снимаем флаг
             if (subTasks.get(subTaskId).getStatus() != TaskStatus.NEW) {
                 allNew = false;

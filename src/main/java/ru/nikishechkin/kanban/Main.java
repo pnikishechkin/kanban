@@ -1,6 +1,6 @@
 package ru.nikishechkin.kanban;
 
-import ru.nikishechkin.kanban.controller.TaskManager;
+import ru.nikishechkin.kanban.manager.TaskManager;
 import ru.nikishechkin.kanban.model.Epic;
 import ru.nikishechkin.kanban.model.SubTask;
 import ru.nikishechkin.kanban.model.Task;

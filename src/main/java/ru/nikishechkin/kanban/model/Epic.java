@@ -11,7 +11,7 @@ public class Epic extends Task {
         this.subTasksIds = new HashSet<>();
     }
 
-    public HashSet<Integer> getListSubTasksIds() {
+    public HashSet<Integer> getSubTasksIds() {
         return subTasksIds;
     }
 
