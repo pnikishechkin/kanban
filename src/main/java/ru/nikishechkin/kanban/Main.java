@@ -21,9 +21,28 @@ public class Main {
         addTestData(taskManager);
         printAllTasks(taskManager);
 
+        System.out.println("----------------------------------------------------");
+        System.out.println("ТЕСТ 1:");
         System.out.println("ИЗМЕНЕНИЕ ДАННЫХ ЗАДАЧ, СТАТУСОВ И УДАЛЕНИЕ ЗАДАЧИ..." + "\n");
         changeStatus(taskManager);
         printAllTasks(taskManager);
+
+        System.out.println("----------------------------------------------------");
+        System.out.println("ТЕСТ 2:");
+        System.out.println("УДАЛЕНИЕ ВСЕХ ПОДЗАДАЧ 1го ЭПИКА..." + "\n");
+        deleteSubTasksFirstEpic(taskManager);
+        printAllTasks(taskManager);
+
+        System.out.println("----------------------------------------------------");
+        System.out.println("ТЕСТ 3:");
+        System.out.println("ОЧИСТКА ВСЕХ ПОДЗАДАЧ");
+        taskManager.clearSubTasks();
+        printAllTasks(taskManager);
+    }
+
+    private static void deleteSubTasksFirstEpic(TaskManager taskManager) {
+        taskManager.deleteSubTask(1);
+        taskManager.deleteSubTask(2);
     }
 
     /**

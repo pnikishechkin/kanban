@@ -59,13 +59,18 @@ public class TaskManager {
     }
 
     /**
-     * Очистить все эпики
+     * Очистить все подзадачи
      */
     public void clearSubTasks() {
         subTasks.clear();
         // Очищаем все списки подзадач у эпиков, поскольку их больше нет
         for (Epic epic : getEpics()) {
             epic.getSubTasksIds().clear();
+        }
+
+        // Обновление статусов всех эпиков
+        for (Integer id : epics.keySet()) {
+            updateEpicStatus(id);
         }
     }
 
@@ -141,27 +146,28 @@ public class TaskManager {
             return;
         }
 
-        // Назначение идентификатора
+        // Поиск связанного с сабтаском эпика
+        Epic epic = epics.get(subTask.getEpicId());
+        if (epic == null) {
+            System.out.println("Ошибка! У подзадачи с идентификатором " + subTask.getId() + "не найден эпик " +
+                    "с идентификатором" + subTask.getEpicId());
+            return;
+        }
+
+        // Назначение сабтаску идентификатора
         if (subTask.getId() == null) {
             subTask.setId(count);
             count++;
         } else {
             if (subTasks.containsKey(subTask.getId())) {
                 System.out.println("Ошибка добавления новой подзадачи! Подзадача с таким идентификатором уже существует!");
+                return;
             }
         }
 
         subTasks.put(subTask.getId(), subTask);
 
-        // Добавление подзадачи в список подзадач связанного эпика
-        Epic epic = epics.get(subTask.getEpicId());
-        if (epic != null) {
-            epic.addSubTask(subTask.getId());
-        } else {
-            System.out.println("Ошибка! У подзадачи с идентификатором " + subTask.getId() + "не найден эпик " +
-                    "с идентификатором" + subTask.getEpicId());
-        }
-
+        epic.addSubTask(subTask.getId());
 
         // Обновление статуса связанного эпика
         updateEpicStatus(subTask.getEpicId());
@@ -211,15 +217,16 @@ public class TaskManager {
         subTasks.put(subTaskId, subTask);
 
         // Проверка, что у подзадачи изменился связанный с ней эпик
-        // Если связанный эпик не содержит в своем списке идентификаторов подзадач данной подзадачи
         Epic epic = epics.get(subTask.getEpicId());
+        // Если связанный эпик не содержит в своем списке идентификаторов подзадач данной подзадачи,
         if (!epic.getSubTasksIds().contains(subTaskId)) {
-
             // Находим, к какому эпику принадлежала ранее данная подзадача и удаляем ее из коллекции
             for (Epic ep : epics.values()) {
-                ep.getSubTasksIds().remove(subTaskId);
+                if (ep.getSubTasksIds().contains(subTaskId)) {
+                    ep.getSubTasksIds().remove(subTaskId);
+                    this.updateEpicStatus(ep.getId());
+                }
             }
-
             epic.addSubTask(subTaskId);
         }
 
