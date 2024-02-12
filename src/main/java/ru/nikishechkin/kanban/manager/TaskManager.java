@@ -14,7 +14,7 @@ public class TaskManager {
     private HashMap<Integer, SubTask> subTasks;
     private HashMap<Integer, Task> tasks;
 
-    private static int count = 0;
+    private static int idCounter = 0;
 
     public TaskManager() {
         this.epics = new HashMap<>();
@@ -63,15 +63,12 @@ public class TaskManager {
      */
     public void clearSubTasks() {
         subTasks.clear();
-        // Очищаем все списки подзадач у эпиков, поскольку их больше нет
+        // Очищаем все списки подзадач у эпиков, поскольку их больше нет и обновляем их статусы
         for (Epic epic : getEpics()) {
             epic.getSubTasksIds().clear();
+            updateEpicStatus(epic.getId());
         }
 
-        // Обновление статусов всех эпиков
-        for (Integer id : epics.keySet()) {
-            updateEpicStatus(id);
-        }
     }
 
     /**
@@ -124,8 +121,8 @@ public class TaskManager {
 
         // Назначение идентификатора
         if (epic.getId() == null) {
-            epic.setId(count);
-            count++;
+            epic.setId(idCounter);
+            idCounter++;
         } else {
             if (epics.containsKey(epic.getId())) {
                 System.out.println("Ошибка добавления нового эпика! Эпик с таким идентификатором уже существует!");
@@ -156,8 +153,8 @@ public class TaskManager {
 
         // Назначение сабтаску идентификатора
         if (subTask.getId() == null) {
-            subTask.setId(count);
-            count++;
+            subTask.setId(idCounter);
+            idCounter++;
         } else {
             if (subTasks.containsKey(subTask.getId())) {
                 System.out.println("Ошибка добавления новой подзадачи! Подзадача с таким идентификатором уже существует!");
@@ -186,8 +183,8 @@ public class TaskManager {
 
         // Назначение идентификатора
         if (task.getId() == null) {
-            task.setId(count);
-            count++;
+            task.setId(idCounter);
+            idCounter++;
         } else {
             if (tasks.containsKey(task.getId())) {
                 System.out.println("Ошибка добавления новой задачи! Задача с таким идентификатором уже существует!");
