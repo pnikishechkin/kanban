@@ -1,5 +1,8 @@
 package ru.nikishechkin.kanban;
 
+import ru.nikishechkin.kanban.manager.HistoryManager;
+import ru.nikishechkin.kanban.manager.InMemoryTaskManager;
+import ru.nikishechkin.kanban.manager.Managers;
 import ru.nikishechkin.kanban.manager.TaskManager;
 import ru.nikishechkin.kanban.model.Epic;
 import ru.nikishechkin.kanban.model.SubTask;
@@ -12,12 +15,12 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("----------------------------------------");
-        System.out.println("------------- NIK-TASK v1.0 ------------");
+        System.out.println("------------- NIK-TASK v 2.0 ------------");
         System.out.println("----------------------------------------");
 
         System.out.println();
 
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
         addTestData(taskManager);
         printAllTasks(taskManager);
 
