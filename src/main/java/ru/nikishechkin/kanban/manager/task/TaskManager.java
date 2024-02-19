@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.manager;
+package ru.nikishechkin.kanban.manager.task;
 
 import ru.nikishechkin.kanban.model.Epic;
 import ru.nikishechkin.kanban.model.SubTask;
@@ -44,4 +44,6 @@ public interface TaskManager {
     void deleteTask(int id);
 
     ArrayList<SubTask> getListEpicSubTasks(int epicId);
+
+    ArrayList<Task> getHistory();
 }

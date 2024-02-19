@@ -8,20 +8,30 @@ import static org.junit.jupiter.api.Assertions.*;
 class EpicTest {
 
     @Test
-    void testEpicsEqualsById() {
+    void equals_sameId() {
+        //given
         Epic epic1 = new Epic("Эпик 1", "Описание");
-        epic1.id = 0;
         Epic epic2 = new Epic("Эпик 2", "Описание");
+
+        // when
+        epic1.id = 0;
         epic2.id = 0;
+
+        // then
         Assertions.assertEquals(epic1, epic2, "Эпики с одинаковыми идентификатороми не считаются одинаковыми");
     }
 
     @Test
-    void testAddSubTaskWithEpicId() {
+    void addSubTask_withEpicId() {
+        // given
         Epic epic1 = new Epic("Эпик 1", "Описание");
-        epic1.addSubTask(epic1.getId());
 
-        Assertions.assertFalse(epic1.getSubTasksIds().contains(0),
+        // when
+        epic1.addSubTask(epic1.getId());
+        boolean containsSubTask = epic1.getSubTasksIds().contains(0);
+
+        // then
+        Assertions.assertFalse(containsSubTask,
                 "Эпику можно назначить подзадачу с таким же идентификатором, как у самого эпика");
     }
 

@@ -1,5 +1,6 @@
-package ru.nikishechkin.kanban.manager;
+package ru.nikishechkin.kanban.manager.task;
 
+import ru.nikishechkin.kanban.manager.history.HistoryManager;
 import ru.nikishechkin.kanban.model.Epic;
 import ru.nikishechkin.kanban.model.SubTask;
 import ru.nikishechkin.kanban.model.Task;
@@ -383,9 +384,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
-     *
+     * Получить историю просмотров (последние 10 задач)
+     * @return список с последними просмотренными задачами
      */
-    private void checkAndCorrectHistoryListSize() {
-
+    @Override
+    public ArrayList<Task> getHistory() {
+        return historyManager.getHistory();
     }
+
 }

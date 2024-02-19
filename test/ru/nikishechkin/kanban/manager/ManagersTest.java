@@ -8,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ManagersTest {
 
     @Test
-    void getDefault() {
+    void getDefault_returnTaskManagerNotNull() {
         Assertions.assertNotNull(Managers.getDefault(), "Менеджер задач по умолчанию не создается");
     }
 
     @Test
-    void getDefaultHistory() {
+    void getDefaultHistory_returnHistoryManagerNotNull() {
         Assertions.assertNotNull(Managers.getDefaultHistory(),
                 "Менеджер истории просмотра задач по умолчанию не создается");
     }

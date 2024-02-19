@@ -1,9 +1,7 @@
 package ru.nikishechkin.kanban;
 
-import ru.nikishechkin.kanban.manager.HistoryManager;
-import ru.nikishechkin.kanban.manager.InMemoryTaskManager;
 import ru.nikishechkin.kanban.manager.Managers;
-import ru.nikishechkin.kanban.manager.TaskManager;
+import ru.nikishechkin.kanban.manager.task.TaskManager;
 import ru.nikishechkin.kanban.model.Epic;
 import ru.nikishechkin.kanban.model.SubTask;
 import ru.nikishechkin.kanban.model.Task;

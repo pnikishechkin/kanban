@@ -1,5 +1,10 @@
 package ru.nikishechkin.kanban.manager;
 
+import ru.nikishechkin.kanban.manager.history.HistoryManager;
+import ru.nikishechkin.kanban.manager.history.InMemoryHistoryManager;
+import ru.nikishechkin.kanban.manager.task.InMemoryTaskManager;
+import ru.nikishechkin.kanban.manager.task.TaskManager;
+
 public class Managers {
 
     private static HistoryManager historyManager;

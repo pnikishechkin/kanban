@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.manager;
+package ru.nikishechkin.kanban.manager.history;
 
 import ru.nikishechkin.kanban.model.Task;
 import java.util.ArrayList;

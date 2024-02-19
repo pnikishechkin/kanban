@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.manager;
+package ru.nikishechkin.kanban.manager.history;
 
 import ru.nikishechkin.kanban.model.Task;
 
@@ -32,7 +32,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     /**
      * Получить историю просмотров (последние 10 задач)
-     * @return
+     * @return список с последними просмотренными задачами
      */
     @Override
     public ArrayList<Task> getHistory() {
