@@ -22,7 +22,7 @@ class EpicTest {
     }
 
     @Test
-    void addSubTask_withEpicId() {
+    void addSubTask_subtaskNotAdded_subtaskIdEqualEpicId() {
         // given
         Epic epic1 = new Epic("Эпик 1", "Описание");
 
