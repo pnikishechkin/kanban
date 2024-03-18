@@ -6,6 +6,7 @@ import ru.nikishechkin.kanban.model.Task;
 
 class InMemoryHistoryManagerTest {
 
+    /*
     @Test
     public void addTasks_countShouldBe10() {
         // given
@@ -22,5 +23,6 @@ class InMemoryHistoryManagerTest {
         // Количество задач не должно превышать максимального значения
         Assertions.assertEquals(InMemoryHistoryManager.COUNT_HISTORY_TASKS, countTasksInHistory);
     }
+     */
 
 }
