@@ -7,8 +7,21 @@ import java.util.HashMap;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    public NodeTask head;
-    public NodeTask tail;
+    private class NodeTask {
+        private Task data;
+        private NodeTask next;
+        private NodeTask prev;
+
+        public NodeTask(Task data) {
+            this.data = data;
+            this.next = null;
+            this.prev = null;
+        }
+
+    }
+
+    private NodeTask head;
+    private NodeTask tail;
     private int size = 0;
 
     private HashMap<Integer, NodeTask> history = new HashMap<>();
@@ -21,13 +34,14 @@ public class InMemoryHistoryManager implements HistoryManager {
      * Добавить последний элемент в двухсвязный список
      * @param node
      */
-    public void linkLast(NodeTask node) {
+    private void linkLast(NodeTask node) {
         if (head == null) {
             head = node;
             tail = node;
         } else {
             tail.next = node;
             node.prev = tail;
+            node.next = null;
             tail = node;
         }
         size++;
@@ -82,7 +96,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     /**
-     * Удалить задачу из списка пмросмотренных
+     * Удалить задачу из списка просмотренных
      * @param id идентификатор задачи (подзадачи или эпика)
      */
     @Override
@@ -100,12 +114,14 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public ArrayList<Task> getHistory() {
         ArrayList<Task> res = new ArrayList<>();
-        res.add(head.data);
-        NodeTask cur = head;
-        for (int i = 1; i < size; i++) {
-            cur = cur.next;
-            res.add(cur.data);
+
+        NodeTask node = head;
+        while (node != null) {
+            res.add(node.data);
+            node = node.next;
         }
         return res;
     }
 }
+
+
