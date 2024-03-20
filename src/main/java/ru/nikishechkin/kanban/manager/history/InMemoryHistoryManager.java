@@ -7,19 +7,6 @@ import java.util.HashMap;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private class NodeTask {
-        private Task data;
-        private NodeTask next;
-        private NodeTask prev;
-
-        public NodeTask(Task data) {
-            this.data = data;
-            this.next = null;
-            this.prev = null;
-        }
-
-    }
-
     private NodeTask head;
     private NodeTask tail;
     private int size = 0;
@@ -122,6 +109,19 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
         return res;
     }
+
+    private class NodeTask {
+        private Task data;
+        private NodeTask next;
+        private NodeTask prev;
+
+        public NodeTask(Task data) {
+            this.data = data;
+            this.next = null;
+            this.prev = null;
+        }
+    }
+
 }
 
 
