@@ -2,42 +2,31 @@ package ru.nikishechkin.kanban.manager.task;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import ru.nikishechkin.kanban.manager.Managers;
 import ru.nikishechkin.kanban.manager.history.HistoryManager;
 import ru.nikishechkin.kanban.manager.history.InMemoryHistoryManager;
-import ru.nikishechkin.kanban.model.Epic;
-import ru.nikishechkin.kanban.model.SubTask;
-import ru.nikishechkin.kanban.model.Task;
-import ru.nikishechkin.kanban.model.TaskStatus;
 
-import java.util.HashSet;
 
-class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
+    /**
+     * Создание менеджера задач и заполнение его дефолтными значениями из файла
+     */
     @Override
     public void initData() {
-
         HistoryManager historyManager = new InMemoryHistoryManager();
-        taskManager = new InMemoryTaskManager(historyManager);
+        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.txt");
+        // Заполнение задач дефолтными значениями из специального файла
+        taskManager.loadFromFile("resources\\defaultTasks.txt");
+    }
 
-        InMemoryTaskManager.idCounter = 0;
-
-        taskManager.addEpic(new Epic("Эпик 1", "Описание")); // ID=0
-
-        taskManager.addSubTask(new SubTask("Подзадача 1_1", "Описание", 0)); // ID=1
-        taskManager.addSubTask(new SubTask("Подзадача 1_2", "Описание", 0)); // ID=2
-        taskManager.addSubTask(new SubTask("Подзадача 1_3", "Описание", 0)); // ID=3
-
-        taskManager.addEpic(new Epic("Эпик 2", "Описание")); // ID=4
-        taskManager.addSubTask(new SubTask("Подзадача 2_1", "Описание", 4)); // ID=5
-        taskManager.addSubTask(new SubTask("Подзадача 2_2", "Описание", 4)); // ID=6
-
-        taskManager.addEpic(new Epic("Эпик 3", "Описание")); // ID=7
-        taskManager.addSubTask(new SubTask("Подзадача 3_1", "Описание", 7)); // ID=8
-        taskManager.addSubTask(new SubTask("Подзадача 3_2", "Описание", 7)); // ID=9
-        taskManager.addSubTask(new SubTask("Подзадача 3_3", "Описание", 7)); // ID=10
-
-        taskManager.addTask(new Task("Задача 1", "Описание")); // ID=11
-        taskManager.addTask(new Task("Задача 2", "Описание")); // ID=12
+    /**
+     * Создание менеджера задач заново и загрузка в него данных из привязанного файла
+     */
+    private void reloadFromFile() {
+        HistoryManager historyManager = new InMemoryHistoryManager();
+        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.txt");
+        taskManager.loadFromFile("resources\\tasks.txt");
     }
 
     @Test
@@ -154,4 +143,21 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         super.removeTasks_historyUpdate();
     }
 
+    @Test
+    void changeTasksAndReloadFromFile() {
+        // given
+        initData();
+
+        // when
+        taskManager.deleteSubTask(9);
+        taskManager.deleteSubTask(3);
+        taskManager.deleteEpic(0);
+        taskManager.deleteTask(11);
+        reloadFromFile();
+
+        // then
+        Assertions.assertEquals(taskManager.getTasks().size(), 1);
+        Assertions.assertEquals(taskManager.getEpics().size(), 2);
+        Assertions.assertEquals(taskManager.getSubTasks().size(), 4);
+    }
 }
