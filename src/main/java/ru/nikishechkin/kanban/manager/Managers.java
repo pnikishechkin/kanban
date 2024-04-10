@@ -33,7 +33,7 @@ public class Managers {
             getDefaultHistory();
         }
 
-        FileBackedTaskManager fbtm = new FileBackedTaskManager(historyManager, "resources\\tasks.txt");
+        FileBackedTaskManager fbtm = new FileBackedTaskManager(historyManager, "resources\\tasks.csv");
         return fbtm;
     }
 

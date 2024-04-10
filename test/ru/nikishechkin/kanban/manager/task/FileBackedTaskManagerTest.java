@@ -15,9 +15,9 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     @Override
     public void initData() {
         HistoryManager historyManager = new InMemoryHistoryManager();
-        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.txt");
+        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.csv");
         // Заполнение задач дефолтными значениями из специального файла
-        taskManager.loadFromFile("resources\\defaultTasks.txt");
+        taskManager.loadFromFile("resources\\defaultTasks.csv");
     }
 
     /**
@@ -25,8 +25,8 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
      */
     private void reloadFromFile() {
         HistoryManager historyManager = new InMemoryHistoryManager();
-        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.txt");
-        taskManager.loadFromFile("resources\\tasks.txt");
+        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.csv");
+        taskManager.loadFromFile("resources\\tasks.csv");
     }
 
     @Test
