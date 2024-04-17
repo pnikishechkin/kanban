@@ -12,3 +12,5 @@ id,type,name,status,description,epic
 8,SUBTASK,Подзадача 3_1,NEW,Описание,7
 9,SUBTASK,Подзадача 3_2,NEW,Описание,7
 10,SUBTASK,Подзадача 3_3,NEW,Описание,7
+
+0,4,7,9,6,3

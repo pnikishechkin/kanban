@@ -59,6 +59,14 @@ public class Task {
         return type;
     }
 
+    /**
+     * Сконвертировать описание задачи в csv формат
+     * @return строка в csv формате с описанием задачи
+     */
+    public String convertToCsv() {
+        return id + "," + type.toString() + "," + name + "," + status.toString() + "," + description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

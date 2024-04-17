@@ -1,17 +1,18 @@
 package ru.nikishechkin.kanban.manager.task;
 
+import ru.nikishechkin.kanban.exceptions.ManagerFileException;
 import ru.nikishechkin.kanban.manager.history.HistoryManager;
 import ru.nikishechkin.kanban.model.Epic;
 import ru.nikishechkin.kanban.model.SubTask;
 import ru.nikishechkin.kanban.model.Task;
-import ru.nikishechkin.kanban.model.TaskStatus;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private String fileName = "";
-    private final String header = "id,type,name,status,description,epic";
 
     public FileBackedTaskManager(HistoryManager historyManager, String fileName) {
         super(historyManager);
@@ -22,24 +23,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
 
-            bw.write(header);
-            bw.newLine();
-
-            for (Task task : getTasks()) {
-                bw.write(task.toString());
-                bw.newLine();
-            }
-            for (Epic epic : getEpics()) {
-                bw.write(epic.toString());
-                bw.newLine();
-            }
-            for (SubTask subTask : getSubTasks()) {
-                bw.write(subTask.toString());
-                bw.newLine();
-            }
+            String str = TaskConverterCsv.getStrFromTasksAndHistory(this, historyManager);
+            bw.write(str);
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка при сохранении файла!", e);
+            throw new ManagerFileException("Ошибка при сохранении файла!", e);
         }
     }
 
@@ -52,66 +40,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     /**
      * Загрузить данные из внешнего файла (без привязки к нему)
+     *
      * @param fileName
      */
     public void loadFromFile(String fileName) {
 
-        // Какой способ чтения файлов предпочтительнее? (современнее?) в описании ТЗ написано про метод
-        // Files.readString(file.toPath()); - он имеет какие-то преимущества перед BufferedReader?
-
-        try (BufferedReader bw = new BufferedReader(new FileReader(fileName))) {
-
-            bw.readLine(); // хэдер
-
-            while (bw.ready()) {
-                String str = bw.readLine();
-                Task newTask = getTaskFromString(str);
-
-                if (newTask == null) {
-                    // throw new ManagerLoadException("Ошибка загрузки из файла!");
-                }
-
-                switch (newTask.getType()) {
-                    case EPIC:
-                        addEpic((Epic)newTask);
-                        break;
-                    case TASK:
-                        addTask(newTask);
-                        break;
-                    case SUBTASK:
-                        addSubTask((SubTask)newTask);
-                        break;
-                }
-            }
-
+        try {
+            String str = Files.readString(Paths.get(fileName));
+            this.clearAll();
+            TaskConverterCsv.getTasksAndHistoryFromStr(str, this, historyManager);
         } catch (IOException e) {
-            throw new ManagerLoadException("Ошибка загрузки из файла!", e);
+            throw new RuntimeException(e);
         }
-    }
-
-    private Task getTaskFromString(String str) {
-        String[] data = str.split(",");
-        Task task = null;
-
-        if (data.length == 5 || data.length == 6) {
-            switch (data[1]) {
-                case "EPIC":
-                    task = new Epic(data[2], data[4]);
-                    break;
-                case "TASK":
-                    task = new Task(data[2], data[4]);
-                    break;
-                case "SUBTASK":
-                    task = new SubTask(data[2], data[4], Integer.parseInt(data[5]));
-                    break;
-            }
-            task.setId(Integer.parseInt(data[0]));
-
-            TaskStatus status = TaskStatus.valueOf(data[3]);
-            task.setStatus(status);
-        }
-
-        return task;
     }
 
     @Override
@@ -184,5 +124,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void deleteTask(int id) {
         super.deleteTask(id);
         save();
+    }
+
+    @Override
+    public Epic getEpicById(int id) {
+        Epic epic = super.getEpicById(id);
+        save();
+        return epic;
+    }
+
+    @Override
+    public SubTask getSubTaskById(int id) {
+        SubTask subTask = super.getSubTaskById(id);
+        save();
+        return subTask;
+    }
+
+    @Override
+    public Task getTaskById(int id) {
+        Task task = super.getTaskById(id);
+        save();
+        return task;
     }
 }

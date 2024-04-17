@@ -110,6 +110,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         return res;
     }
 
+    @Override
+    public void clear() {
+        history.clear();
+        head = null;
+        tail = null;
+    }
+
     private class NodeTask {
         private Task data;
         private NodeTask next;

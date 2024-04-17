@@ -15,6 +15,8 @@ public class Managers {
     private static HistoryManager historyManager;
     private static TaskManager taskManager;
 
+    private Managers() { }
+
     public static TaskManager getDefault() {
 
         if (historyManager == null) {
@@ -34,6 +36,7 @@ public class Managers {
         }
 
         FileBackedTaskManager fbtm = new FileBackedTaskManager(historyManager, "resources\\tasks.csv");
+        fbtm.load();
         return fbtm;
     }
 

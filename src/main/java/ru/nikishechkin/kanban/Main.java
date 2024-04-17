@@ -21,46 +21,6 @@ public class Main {
         TaskManager taskManager = Managers.getFileBackedTaskManager();
         printAllTasks(taskManager);
 
-//        taskManager.addEpic(new Epic("Эпик 1", "Описание")); // ID=0
-//
-//        taskManager.addSubTask(new SubTask("Подзадача 1_1", "Описание", 0)); // ID=1
-//        taskManager.addSubTask(new SubTask("Подзадача 1_2", "Описание", 0)); // ID=2
-//        taskManager.addSubTask(new SubTask("Подзадача 1_3", "Описание", 0)); // ID=3
-//
-//        taskManager.addEpic(new Epic("Эпик 2", "Описание")); // ID=4
-//        taskManager.addSubTask(new SubTask("Подзадача 2_1", "Описание", 4)); // ID=5
-//        taskManager.addSubTask(new SubTask("Подзадача 2_2", "Описание", 4)); // ID=6
-//
-//        taskManager.addEpic(new Epic("Эпик 3", "Описание")); // ID=7
-//        taskManager.addSubTask(new SubTask("Подзадача 3_1", "Описание", 7)); // ID=8
-//        taskManager.addSubTask(new SubTask("Подзадача 3_2", "Описание", 7)); // ID=9
-//        taskManager.addSubTask(new SubTask("Подзадача 3_3", "Описание", 7)); // ID=10
-//
-//        taskManager.addTask(new Task("Задача 1", "Описание")); // ID=11
-//        taskManager.addTask(new Task("Задача 2", "Описание")); // ID=12
-
-
-
-        //        addTestData(taskManager);
-//        printAllTasks(taskManager);
-//
-//        System.out.println("----------------------------------------------------");
-//        System.out.println("ТЕСТ 1:");
-//        System.out.println("ИЗМЕНЕНИЕ ДАННЫХ ЗАДАЧ, СТАТУСОВ И УДАЛЕНИЕ ЗАДАЧИ..." + "\n");
-//        changeStatus(taskManager);
-//        printAllTasks(taskManager);
-
-//        System.out.println("----------------------------------------------------");
-//        System.out.println("ТЕСТ 2:");
-//        System.out.println("УДАЛЕНИЕ ВСЕХ ПОДЗАДАЧ 1го ЭПИКА..." + "\n");
-//        deleteSubTasksFirstEpic(taskManager);
-//        printAllTasks(taskManager);
-
-//        System.out.println("----------------------------------------------------");
-//        System.out.println("ТЕСТ 3:");
-//        System.out.println("ОЧИСТКА ВСЕХ ПОДЗАДАЧ");
-//        taskManager.clearSubTasks();
-//        printAllTasks(taskManager);
     }
 
     private static void deleteSubTasksFirstEpic(TaskManager taskManager) {
