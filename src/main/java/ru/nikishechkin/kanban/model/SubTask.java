@@ -27,11 +27,6 @@ public class SubTask extends Task {
     }
 
     @Override
-    public String convertToCsv() {
-        return super.convertToCsv() + "," + epicId;
-    }
-
-    @Override
     public String toString() {
         return super.toString() + "," + epicId;
     }

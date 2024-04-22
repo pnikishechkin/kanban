@@ -2,8 +2,13 @@ package ru.nikishechkin.kanban.manager.task;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.nikishechkin.kanban.manager.history.HistoryManager;
-import ru.nikishechkin.kanban.manager.history.InMemoryHistoryManager;
+import ru.nikishechkin.kanban.manager.Managers;
+import ru.nikishechkin.kanban.model.Epic;
+import ru.nikishechkin.kanban.model.SubTask;
+import ru.nikishechkin.kanban.model.Task;
+
+import java.io.IOException;
+import java.nio.file.*;
 
 
 public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
@@ -13,115 +18,29 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
      */
     @Override
     public void initData() {
-        HistoryManager historyManager = new InMemoryHistoryManager();
-        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.csv");
-        // Заполнение задач дефолтными значениями из специального файла
-        taskManager.loadFromFile("resources\\defaultTasks.csv");
+
+        // Заполнение файла с задачами дефолтными тестовыми данными
+        try {
+            Files.copy(Path.of("resources\\defaultTasks.csv"), Path.of("resources\\tasks.csv"), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Загрузка задач из файла
+        taskManager = Managers.getFileBackedTaskManager("resources\\tasks.csv");
     }
 
-    /**
-     * Создание менеджера задач заново и загрузка в него данных из привязанного файла
-     */
-    private void reloadFromFile() {
-        HistoryManager historyManager = new InMemoryHistoryManager();
-        taskManager = new FileBackedTaskManager(historyManager, "resources\\tasks.csv");
-        taskManager.loadFromFile("resources\\tasks.csv");
-    }
+    public void initEmptyData() {
+        // Очистка файла с задачами
+        try {
+            Path path = Paths.get("resources\\tasks.csv");
+            Files.writeString(path, "");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-    @Test
-    @Override
-    void getEpics_checkSize() {
-        super.getEpics_checkSize();
-    }
-
-    @Test
-    @Override
-    void getSubTasks_checkSize() {
-        super.getSubTasks_checkSize();
-    }
-
-    @Test
-    @Override
-    void getTasks_checkSize() {
-        super.getTasks_checkSize();
-    }
-
-    @Test
-    @Override
-    void getEpicById_epicExist() {
-        super.getEpicById_epicExist();
-    }
-
-    @Test
-    @Override
-    void getEpicById_epicNotExist() {
-        super.getEpicById_epicNotExist();
-    }
-
-    @Test
-    @Override
-    void getSubTaskById_subTaskExist() {
-        super.getSubTaskById_subTaskExist();
-    }
-
-    @Test
-    @Override
-    void getSubTaskById_subTaskNotExist() {
-        super.getSubTaskById_subTaskNotExist();
-    }
-
-    @Test
-    @Override
-    void getTaskById_taskExist() {
-        super.getTaskById_taskExist();
-    }
-
-    @Test
-    @Override
-    void getTaskById_taskNotExist() {
-        super.getTaskById_taskNotExist();
-    }
-
-    @Test
-    @Override
-    void getSubTasksIds_checkList() {
-        super.getSubTasksIds_checkList();
-    }
-
-    @Test
-    @Override
-    void editTask_changeStatus() {
-        super.editTask_changeStatus();
-    }
-
-    @Test
-    @Override
-    void editSubTask_changeStatusSubTaskAndEpic() {
-        super.editSubTask_changeStatusSubTaskAndEpic();
-    }
-
-    @Test
-    @Override
-    void editSubTask_changeStatusSubTask() {
-        super.editSubTask_changeStatusSubTask();
-    }
-
-    @Test
-    @Override
-    void clearTasks_taskCountIsZero() {
-        super.clearTasks_taskCountIsZero();
-    }
-
-    @Test
-    @Override
-    void clearSubTasks_subTaskCountIsZero() {
-        super.clearSubTasks_subTaskCountIsZero();
-    }
-
-    @Test
-    @Override
-    void clearEpics_epicsCountAndSubTasksIsZero() {
-        super.clearEpics_epicsCountAndSubTasksIsZero();
+        // Загрузка задач из файла
+        taskManager = Managers.getFileBackedTaskManager("resources\\tasks.csv");
     }
 
     @Test
@@ -160,12 +79,6 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
     }
 
     @Test
-    @Override
-    void removeSubTask_epicUpdateId() {
-        super.removeSubTask_epicUpdateId();
-    }
-
-    @Test
     void historyInitFromFile() {
         // given
         initData();
@@ -179,6 +92,15 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         Assertions.assertEquals(9, taskManager.getHistory().get(3).getId());
         Assertions.assertEquals(6, taskManager.getHistory().get(4).getId());
         Assertions.assertEquals(3, taskManager.getHistory().get(5).getId());
+
+        // Проверка привязки сабтасков к эпикам
+        Assertions.assertEquals(3, taskManager.getEpicById(0).getSubTasksIds().size());
+        Assertions.assertTrue(taskManager.getEpicById(0).getSubTasksIds().contains(1));
+        Assertions.assertTrue(taskManager.getEpicById(0).getSubTasksIds().contains(2));
+        Assertions.assertTrue(taskManager.getEpicById(0).getSubTasksIds().contains(3));
+
+        Assertions.assertEquals(2, taskManager.getEpicById(4).getSubTasksIds().size());
+        Assertions.assertEquals(3, taskManager.getEpicById(7).getSubTasksIds().size());
     }
 
     @Test
@@ -242,11 +164,39 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         taskManager.deleteSubTask(3);
         taskManager.deleteEpic(0);
         taskManager.deleteTask(11);
-        reloadFromFile();
+        // Загрузка заново из файла
+        taskManager = Managers.getFileBackedTaskManager("resources\\tasks.csv");
 
         // then
         Assertions.assertEquals(taskManager.getTasks().size(), 1);
         Assertions.assertEquals(taskManager.getEpics().size(), 2);
         Assertions.assertEquals(taskManager.getSubTasks().size(), 4);
+    }
+
+    @Test
+    void createTwoFileManagers() {
+        // given
+        initEmptyData();
+
+        taskManager.addEpic(new Epic("Эпик 3", "Описание"));
+        taskManager.addSubTask(new SubTask("Подзадача 3_1", "Описание", taskManager.getEpics().get(0).getId()));
+        taskManager.addSubTask(new SubTask("Подзадача 3_2", "Описание", taskManager.getEpics().get(0).getId()));
+        taskManager.addSubTask(new SubTask("Подзадача 3_3", "Описание", taskManager.getEpics().get(0).getId()));
+
+        taskManager.addTask(new Task("Задача 1", "Описание"));
+        taskManager.addTask(new Task("Задача 2", "Описание"));
+
+        Assertions.assertEquals(1, taskManager.getEpics().size());
+        Assertions.assertEquals(3, taskManager.getSubTasks().size());
+        Assertions.assertEquals(2, taskManager.getTasks().size());
+
+        FileBackedTaskManager taskManager2 = Managers.getFileBackedTaskManager("resources\\tasks.csv");
+        Assertions.assertEquals(1, taskManager2.getEpics().size());
+        Assertions.assertEquals(3, taskManager2.getSubTasks().size());
+        Assertions.assertEquals(2, taskManager2.getTasks().size());
+
+        taskManager2.addTask(new Task("Задача 3", "Описание"));
+
+        Assertions.assertEquals(3, taskManager2.getTasks().size());
     }
 }

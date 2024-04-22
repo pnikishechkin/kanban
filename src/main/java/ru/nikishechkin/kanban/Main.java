@@ -15,12 +15,6 @@ public class Main {
         System.out.println("----------------------------------------");
         System.out.println("------------- NIK-TASK v 2.0 ------------");
         System.out.println("----------------------------------------");
-
-        System.out.println();
-
-        TaskManager taskManager = Managers.getFileBackedTaskManager();
-        printAllTasks(taskManager);
-
     }
 
     private static void deleteSubTasksFirstEpic(TaskManager taskManager) {

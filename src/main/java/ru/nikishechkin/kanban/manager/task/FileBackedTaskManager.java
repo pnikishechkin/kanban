@@ -9,22 +9,60 @@ import ru.nikishechkin.kanban.model.Task;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private String fileName = "";
 
-    public FileBackedTaskManager(HistoryManager historyManager, String fileName) {
+    private FileBackedTaskManager(HistoryManager historyManager, String fileName) {
         super(historyManager);
         this.fileName = fileName;
+    }
+
+    /**
+     * Метод для создания экземпляра класса файлового таск-менеджера и загрузки из файла
+     * @param historyManager
+     * @param fileName
+     * @return
+     */
+    public static FileBackedTaskManager loadFromFile(HistoryManager historyManager, String fileName) {
+
+        FileBackedTaskManager fbtm = new FileBackedTaskManager(historyManager, fileName);
+        fbtm.load();
+        return fbtm;
     }
 
     private void save() {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName))) {
 
-            String str = TaskConverterCsv.getStrFromTasksAndHistory(this, historyManager);
-            bw.write(str);
+            StringBuilder res = new StringBuilder();
+
+            // Заголовок
+            res.append(TaskConverterCsv.header);
+            res.append("\n");
+
+            // Запись задач, эпиков, подзадач
+            for (Task task : this.getTasks()) {
+                res.append(TaskConverterCsv.taskToCsvLine(task));
+            }
+            for (Epic epic : this.getEpics()) {
+                res.append(TaskConverterCsv.taskToCsvLine(epic));
+            }
+            for (SubTask subTask : this.getSubTasks()) {
+                res.append(TaskConverterCsv.taskToCsvLine(subTask));
+            }
+
+            // Дополнительная пустая строка перед записью истории
+            res.append("\n");
+
+            // Запись истории
+            res.append(TaskConverterCsv.historyToCsvLine(historyManager));
+
+            bw.write(res.toString());
 
         } catch (IOException e) {
             throw new ManagerFileException("Ошибка при сохранении файла!", e);
@@ -32,23 +70,67 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     /**
-     * Загрузить данные из привязанного файла
+     * Загрузить данные из внешнего файла
      */
-    public void load() {
-        this.loadFromFile(fileName);
-    }
-
-    /**
-     * Загрузить данные из внешнего файла (без привязки к нему)
-     *
-     * @param fileName
-     */
-    public void loadFromFile(String fileName) {
-
+    private void load() {
         try {
+            // Считывание всех данных файла в строку
             String str = Files.readString(Paths.get(fileName));
-            this.clearAll();
-            TaskConverterCsv.getTasksAndHistoryFromStr(str, this, historyManager);
+
+            if (str == null || str.isEmpty())
+                return;
+
+            Boolean wasEmpty = false;
+
+            // Считывание задач, эпиков и подзадач
+            for (String s: str.lines().collect(Collectors.toList())) {
+
+                if (s.equals(TaskConverterCsv.header)) continue;
+
+                if (!s.isEmpty() && !wasEmpty) {
+                    // Считывание задач
+                    Task newTask = TaskConverterCsv.csvLineToTask(s);
+
+                    switch (newTask.getType()) {
+                        case EPIC:
+                            this.addEpic((Epic) newTask);
+                            break;
+                        case TASK:
+                            this.addTask(newTask);
+                            break;
+                        case SUBTASK:
+                            this.addSubTask((SubTask) newTask);
+                            break;
+                    }
+                } else if (!s.isEmpty() && wasEmpty) { // Считывание истории
+
+                    List<Integer> ids = TaskConverterCsv.сsvLineToIds(s);
+
+                    for (Integer id : ids) {
+
+                        Task task = this.tasks.get(id);
+                        if (task == null) {
+                            task = this.epics.get(id);
+                        }
+                        if (task == null) {
+                            task = this.subTasks.get(id);
+                        }
+                        if (task == null) {
+                            throw new ManagerFileException("Ошибка чтения истории задач - задача с идентификатором "
+                                    + id.toString() + " не найдена");
+                        }
+                        historyManager.add(task);
+                    }
+
+                } else {
+                    wasEmpty = true;
+                }
+            }
+
+            // Поиск максимального значения идентификатора задач и его назначение
+            idCounter = Math.max(Math.max(Collections.max(epics.keySet()), Collections.max(subTasks.keySet())),
+                     Collections.max(tasks.keySet())) + 1;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
