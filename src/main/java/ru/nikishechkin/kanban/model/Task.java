@@ -8,18 +8,19 @@ public class Task {
     protected String name;
     protected TaskStatus status;
     protected String description;
+    protected TaskType type;
 
     public Task(Integer id, String name, String description, TaskStatus status) {
+        this(name, description);
         this.id = id;
-        this.name = name;
         this.status = status;
-        this.description = description;
     }
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = TaskStatus.NEW;
+        this.type = TaskType.TASK;
     }
 
     public Integer getId() {
@@ -54,6 +55,10 @@ public class Task {
         this.description = description;
     }
 
+    public TaskType getType() {
+        return type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,6 +74,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return id + " | " + name + " | " + status;
+        return id + "," + type.toString() + "," + name + "," + status.toString() + "," + description;
     }
 }

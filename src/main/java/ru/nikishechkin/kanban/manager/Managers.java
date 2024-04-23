@@ -2,6 +2,7 @@ package ru.nikishechkin.kanban.manager;
 
 import ru.nikishechkin.kanban.manager.history.HistoryManager;
 import ru.nikishechkin.kanban.manager.history.InMemoryHistoryManager;
+import ru.nikishechkin.kanban.manager.task.FileBackedTaskManager;
 import ru.nikishechkin.kanban.manager.task.InMemoryTaskManager;
 import ru.nikishechkin.kanban.manager.task.TaskManager;
 
@@ -10,23 +11,20 @@ public class Managers {
     private static HistoryManager historyManager;
     private static TaskManager taskManager;
 
+    private Managers() { }
+
     public static TaskManager getDefault() {
-
-        if(historyManager == null) {
-            getDefaultHistory();
-        }
-        if (taskManager == null) {
-            taskManager = new InMemoryTaskManager(historyManager);
-        }
-
+        taskManager = new InMemoryTaskManager(getDefaultHistory());
         return taskManager;
     }
 
-    public static HistoryManager getDefaultHistory() {
-        if (historyManager == null) {
-            historyManager = new InMemoryHistoryManager();
-        }
+    public static FileBackedTaskManager getFileBackedTaskManager(String fileName) {
+        return FileBackedTaskManager.loadFromFile(getDefaultHistory(), fileName);
+    }
 
+    public static HistoryManager getDefaultHistory() {
+        historyManager = new InMemoryHistoryManager();
         return historyManager;
     }
+
 }
