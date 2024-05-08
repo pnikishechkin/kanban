@@ -1,17 +1,21 @@
 package ru.nikishechkin.kanban.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class SubTask extends Task {
 
     private Integer epicId;
 
-    public SubTask(Integer id, String name, String description, TaskStatus taskStatus, Integer epicId) {
-        super(id, name, description, taskStatus);
+    public SubTask(Integer id, String name, String description, TaskStatus taskStatus,
+                   LocalDateTime startTime, Duration duration, Integer epicId) {
+        super(id, name, description, taskStatus, startTime, duration);
         this.setEpicId(epicId);
         this.type = TaskType.SUBTASK;
     }
 
-    public SubTask(String name, String description, Integer epicId) {
-        super(name, description);
+    public SubTask(String name, String description, LocalDateTime startTime, Duration duration, Integer epicId) {
+        super(name, description, startTime, duration);
         this.setEpicId(epicId);
         this.type = TaskType.SUBTASK;
     }
