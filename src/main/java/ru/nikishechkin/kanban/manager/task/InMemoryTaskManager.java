@@ -7,7 +7,6 @@ import ru.nikishechkin.kanban.model.Task;
 import ru.nikishechkin.kanban.model.TaskStatus;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -21,15 +20,36 @@ public class InMemoryTaskManager implements TaskManager {
     protected static int idCounter = 0;
     protected HistoryManager historyManager;
 
+    Comparator<Task> taskComparatorByDate = new Comparator<>() {
+        @Override
+        public int compare(Task task1, Task task2) {
+            if (task1.getStartTime().isPresent() && task2.getStartTime().isPresent()) {
+                return task1.getStartTime().get().compareTo(task2.getStartTime().get());
+            }
+            return 1;
+        }
+    };
+
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.epics = new HashMap<>();
         this.subTasks = new HashMap<>();
         this.tasks = new HashMap<>();
 
-        this.prioritizedTasks = new TreeSet<>();
-
+        this.prioritizedTasks = new TreeSet<>(taskComparatorByDate);
         this.historyManager = historyManager;
     }
+/*
+    class TaskComparator implements Comparator<Task> {
+
+        @Override
+        public int compare(Task task1, Task task2) {
+            if (task1.getStartTime().isPresent() && task2.getStartTime().isPresent()) {
+                return task1.getStartTime().get().compareTo(task2.getStartTime().get());
+            }
+            return 1;
+        }
+    }
+*/
 
     /**
      * Получить множество, содержащее задачи, имеющие дату начала и отсортированные по ней
@@ -77,7 +97,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void clearEpics() {
         epics.clear();
         // Подзадачи также удаляются, поскольку не имеют самостоятельного значения
-        subTasks.clear();
+        clearSubTasks();
     }
 
     /**
@@ -85,6 +105,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void clearSubTasks() {
+        subTasks.values().forEach(subTask -> prioritizedTasks.remove(subTask));
         subTasks.clear();
         // Очищаем все списки подзадач у эпиков, поскольку их больше нет и обновляем их статусы
         getEpics().stream().forEach(epic -> {
@@ -98,6 +119,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void clearTasks() {
+        tasks.values().forEach(task -> prioritizedTasks.remove(task));
         tasks.clear();
     }
 
@@ -170,7 +192,7 @@ public class InMemoryTaskManager implements TaskManager {
      *
      * @param task
      */
-    private void checkAndAddTaskToSortedSet(Task task) {
+    private void updateTaskInSortedSet(Task task) {
         if (task.getStartTime().isPresent()) {
             prioritizedTasks.add(task);
         } else {
@@ -191,8 +213,10 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         // Проверка на пересечение с другими задачами
-        if (prioritizedTasks.stream().filter(t -> checkTasksOverlap(subTask, t)).findAny().isPresent()) {
-            System.out.println("Ошибка добавления подзадачи. Указанная дата пересекается с имеющейся задачей.");
+        try {
+            checkTaskOverlapToExist(subTask);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
             return;
         }
 
@@ -221,7 +245,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         // Обновление статуса связанного эпика
         updateEpicData(subTask.getEpicId());
-        checkAndAddTaskToSortedSet(subTask);
+        updateTaskInSortedSet(subTask);
     }
 
     /**
@@ -237,8 +261,10 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         // Проверка на пересечение с другими задачами
-        if (prioritizedTasks.stream().filter(t -> checkTasksOverlap(task, t)).findAny().isPresent()) {
-            System.out.println("Ошибка добавления задачи. Указанная дата пересекается с имеющейся задачей.");
+        try {
+            checkTaskOverlapToExist(task);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
             return;
         }
 
@@ -253,7 +279,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         tasks.put(task.getId(), task);
-        this.checkAndAddTaskToSortedSet(task);
+        this.updateTaskInSortedSet(task);
     }
 
     /**
@@ -274,9 +300,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void editSubTask(SubTask subTask) {
 
-        // Проверка на пересечение с другими задачами
-        if (prioritizedTasks.stream().filter(t -> checkTasksOverlap(subTask, t)).findAny().isPresent()) {
-            System.out.println("Ошибка редактирования подзадачи. Указанная дата пересекается с имеющейся задачей.");
+        // Проверка на пересечение с другими задачами по времени
+        try {
+            checkTaskOverlapToExist(subTask);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
             return;
         }
 
@@ -303,7 +331,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.addSubTask(subTaskId);
         }
 
-        this.checkAndAddTaskToSortedSet(subTask);
+        this.updateTaskInSortedSet(subTask);
         this.updateEpicData(subTask.getEpicId());
     }
 
@@ -316,8 +344,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void editTask(Task task) {
 
         // Проверка на пересечение с другими задачами
-        if (prioritizedTasks.stream().filter(t -> checkTasksOverlap(task, t)).findAny().isPresent()) {
-            System.out.println("Ошибка редактирования задачи. Указанная дата пересекается с имеющейся задачей.");
+        try {
+            checkTaskOverlapToExist(task);
+        } catch (RuntimeException ex) {
+            System.out.println(ex.getMessage());
             return;
         }
 
@@ -328,7 +358,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         tasks.put(task.getId(), task);
-        this.checkAndAddTaskToSortedSet(task);
+        this.updateTaskInSortedSet(task);
     }
 
     /**
@@ -475,47 +505,53 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void updateEpicTimes(int epicId) {
 
-        Epic epic = this.epics.get(epicId);
+        Epic epic = epics.get(epicId);
 
         if (epic == null) {
             return;
         }
 
-        LocalDateTime minStartTime = null;
-        LocalDateTime maxEndTime = null;
-        Duration resDuration = Duration.ZERO;
+        TreeSet<Task> subTasks = new TreeSet<>(taskComparatorByDate);
 
-        for (Integer subTaskId : epic.getSubTasksIds()) {
-            SubTask subTask = this.subTasks.get(subTaskId);
-            if (minStartTime == null) {
-                minStartTime = subTask.getStartTime().get();
-            } else if (minStartTime.isAfter(subTask.getStartTime().get())) {
-                minStartTime = subTask.getStartTime().get();
-            }
+        getListEpicSubTasks(epicId).forEach(subTask -> {
+            if (subTask.getStartTime().isPresent())
+                subTasks.add(subTask);
+        });
 
-            if (maxEndTime == null) {
-                maxEndTime = subTask.getEndTime();
-            } else if (maxEndTime.isBefore(subTask.getEndTime())) {
-                maxEndTime = subTask.getEndTime();
-            }
+        if (subTasks.size() > 0) {
+            epic.setStartTime(subTasks.first().getStartTime().get());
+            epic.setEndTime(subTasks.last().getEndTime());
 
-            if (subTask.getDuration() != null) {
-                resDuration = resDuration.plus(subTask.getDuration());
+            Duration duration = Duration.ZERO;
+            for (Task subTask: subTasks) {
+                duration = duration.plus(subTask.getDuration());
             }
+            // Как это можно переписать через лямбду, с учетом что переменная должна быть final?
+            // И в целом, приоритетнее ли в подобном случае использовать именно лямбду?
+            // subTasks.forEach(subTask -> duration = duration.plus(subTask.getDuration()));
+
+            epic.setDuration(duration);
+        }
+        else {
+            epic.setStartTime(null);
+            epic.setDuration(Duration.ZERO);
+            epic.setEndTime(null);
         }
 
-        epic.setStartTime(minStartTime);
-        epic.setEndTime(maxEndTime);
-        epic.setDuration(resDuration);
     }
 
     /**
      * Проверка двух задач на пересечение по датам
+     *
      * @param task1
      * @param task2
      * @return
      */
     private boolean checkTasksOverlap(Task task1, Task task2) {
+
+        if (task1.getId() != null && task2.getId() != null && task1.getId().equals(task2.getId())) {
+            return false;
+        }
 
         if (!task1.getStartTime().isPresent() || !task2.getStartTime().isPresent())
             return false;
@@ -529,6 +565,22 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         return false;
+    }
+
+    /**
+     * Проверка на пересечение задачи с имеющимися в списке
+     *
+     * @param task
+     */
+    private void checkTaskOverlapToExist(Task task) {
+        if (prioritizedTasks.stream().filter(t -> checkTasksOverlap(task, t)).findAny().isPresent()) {
+            String type = "задачи";
+            if (task instanceof SubTask) {
+                type = "подзадачи";
+            }
+
+            throw new RuntimeException("Ошибка! Указанная дата " + type + " пересекается с имеющейся задачей.");
+        }
     }
 
 }

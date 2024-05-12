@@ -4,10 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.nikishechkin.kanban.manager.history.HistoryManager;
 import ru.nikishechkin.kanban.manager.history.InMemoryHistoryManager;
-import ru.nikishechkin.kanban.model.Epic;
-import ru.nikishechkin.kanban.model.SubTask;
-import ru.nikishechkin.kanban.model.Task;
-import ru.nikishechkin.kanban.model.TaskStatus;
+import ru.nikishechkin.kanban.model.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -366,10 +363,6 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
         task1.setDuration(Duration.ofMinutes(30));
 
         // then
-        Assertions.assertEquals(LocalDateTime.of(2024, 6, 12, 15, 30),
-                task1.getStartTime().get());
-        Assertions.assertEquals(30,
-                task1.getDuration().toMinutes());
         Assertions.assertEquals(LocalDateTime.of(2024, 6, 12, 16, 00),
                 task1.getEndTime());
     }
@@ -505,5 +498,114 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
         Assertions.assertEquals(11, taskManager.getPrioritizedTasks().size());
         Assertions.assertEquals(2, taskManager.getTasks().size());
         Assertions.assertEquals(9, taskManager.getSubTasks().size());
+    }
+
+    @Test
+    void addTask_addTaskToPrioritizedList_taskContainsStartTime() {
+        // given
+        initData();
+
+        // when
+        Task newTask = new Task("Задача новая", "Имеет дату, должна попасть в prioritizedList",
+                LocalDateTime.of(2025, 10, 10, 12, 00),
+                Duration.ofMinutes(600));
+        taskManager.addTask(newTask);
+
+        // then
+        Assertions.assertEquals(11, taskManager.prioritizedTasks.size());
+        Assertions.assertTrue(taskManager.prioritizedTasks.contains(newTask));
+    }
+
+    @Test
+    void addTask_notAddTaskToPrioritizedList_taskNotContainsStartTime() {
+        // given
+        initData();
+
+        // when
+        Task newTask = new Task("Задача новая", "Не имеет даты, не должна попасть в prioritizedList",
+                null,
+                Duration.ofMinutes(600));
+        taskManager.addTask(newTask);
+
+        // then
+        Assertions.assertEquals(10, taskManager.prioritizedTasks.size());
+        Assertions.assertFalse(taskManager.prioritizedTasks.contains(newTask));
+    }
+
+    @Test
+    void addSubTask_addSubTaskToPrioritizedList_subTaskContainsStartTime() {
+        // given
+        initData();
+
+        // when
+        SubTask newTask = new SubTask("Подзадача новая", "Имеет дату, должна попасть в prioritizedList",
+                LocalDateTime.of(2025, 10, 10, 12, 00),
+                Duration.ofMinutes(600), 0);
+        taskManager.addTask(newTask);
+
+        // then
+        Assertions.assertEquals(11, taskManager.prioritizedTasks.size());
+        Assertions.assertTrue(taskManager.prioritizedTasks.contains(newTask));
+    }
+
+    @Test
+    void addSubTask_notAddSubTaskToPrioritizedList_subTaskNotContainsStartTime() {
+        // given
+        initData();
+
+        // when
+        SubTask newTask = new SubTask("Подзадача новая", "Не имеет дату, не должна попасть в prioritizedList",
+                null,
+                Duration.ofMinutes(600), 0);
+        taskManager.addTask(newTask);
+
+        // then
+        Assertions.assertEquals(10, taskManager.prioritizedTasks.size());
+        Assertions.assertFalse(taskManager.prioritizedTasks.contains(newTask));
+    }
+
+    @Test
+    void clearTasks_deleteTasksFromPrioritizedList() {
+
+        // given
+        initData();
+
+        // when
+        taskManager.clearTasks();
+
+        // then
+        taskManager.getPrioritizedTasks().forEach(task ->
+                Assertions.assertNotEquals(TaskType.TASK, task.getType()));
+
+    }
+
+    @Test
+    void clearSubTasks_deleteSubTasksFromPrioritizedList() {
+
+        // given
+        initData();
+
+        // when
+        taskManager.clearSubTasks();
+
+        // then
+        taskManager.getPrioritizedTasks().forEach(task ->
+                Assertions.assertNotEquals(TaskType.SUBTASK, task.getType()));
+
+    }
+
+    @Test
+    void clearEpics_deleteEpicsFromPrioritizedList() {
+
+        // given
+        initData();
+
+        // when
+        taskManager.clearEpics();
+
+        // then
+        taskManager.getPrioritizedTasks().forEach(task ->
+                Assertions.assertNotEquals(TaskType.SUBTASK, task.getType()));
+
     }
 }

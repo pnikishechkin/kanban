@@ -2,10 +2,11 @@ package ru.nikishechkin.kanban.model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Task implements Comparable<Task> {
+public class Task {
 
     protected Integer id;
     protected String name;
@@ -105,14 +106,7 @@ public class Task implements Comparable<Task> {
     @Override
     public String toString() {
         return id + "," + type.toString() + "," + name + "," + status.toString() + "," + description + "," +
-                startTime.get() + "," + duration.toMinutes();
+                (startTime.isPresent() ? startTime.get() : "-") + "," + duration.toMinutes();
     }
 
-    @Override
-    public int compareTo(Task o) {
-        if (o.startTime.isPresent() && this.startTime.isPresent()) {
-            return this.startTime.get().compareTo(o.startTime.get());
-        }
-        return 1;
-    }
 }
