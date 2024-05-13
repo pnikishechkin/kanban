@@ -20,7 +20,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected static int idCounter = 0;
     protected HistoryManager historyManager;
 
-    Comparator<Task> taskComparatorByDate = new Comparator<>() {
+    private Comparator<Task> taskComparatorByDate = new Comparator<>() {
         @Override
         public int compare(Task task1, Task task2) {
             if (task1.getStartTime().isPresent() && task2.getStartTime().isPresent()) {
