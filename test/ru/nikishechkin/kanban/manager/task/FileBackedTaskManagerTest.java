@@ -9,7 +9,8 @@ import ru.nikishechkin.kanban.model.Task;
 
 import java.io.IOException;
 import java.nio.file.*;
-
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
@@ -179,12 +180,23 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         initEmptyData();
 
         taskManager.addEpic(new Epic("Эпик 3", "Описание"));
-        taskManager.addSubTask(new SubTask("Подзадача 3_1", "Описание", taskManager.getEpics().get(0).getId()));
-        taskManager.addSubTask(new SubTask("Подзадача 3_2", "Описание", taskManager.getEpics().get(0).getId()));
-        taskManager.addSubTask(new SubTask("Подзадача 3_3", "Описание", taskManager.getEpics().get(0).getId()));
+        taskManager.addSubTask(new SubTask("Подзадача 3_1", "Описание",
+                LocalDateTime.of(2023, 5, 1, 9, 30),
+                Duration.ofMinutes(60),
+                taskManager.getEpics().get(0).getId()));
+        taskManager.addSubTask(new SubTask("Подзадача 3_2", "Описание", LocalDateTime.of(2023, 5, 1, 9, 30),
+                Duration.ofMinutes(60),
+                taskManager.getEpics().get(0).getId()));
+        taskManager.addSubTask(new SubTask("Подзадача 3_3", "Описание", LocalDateTime.of(2023, 5, 1, 9, 30),
+                Duration.ofMinutes(60),
+                taskManager.getEpics().get(0).getId()));
 
-        taskManager.addTask(new Task("Задача 1", "Описание"));
-        taskManager.addTask(new Task("Задача 2", "Описание"));
+        taskManager.addTask(new Task("Задача 1", "Описание",
+                LocalDateTime.of(2023, 5, 1, 9, 30),
+                Duration.ofMinutes(60)));
+        taskManager.addTask(new Task("Задача 2", "Описание",
+                LocalDateTime.of(2023, 5, 1, 9, 30),
+                Duration.ofMinutes(60)));
 
         Assertions.assertEquals(1, taskManager.getEpics().size());
         Assertions.assertEquals(3, taskManager.getSubTasks().size());
@@ -195,8 +207,18 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         Assertions.assertEquals(3, taskManager2.getSubTasks().size());
         Assertions.assertEquals(2, taskManager2.getTasks().size());
 
-        taskManager2.addTask(new Task("Задача 3", "Описание"));
+        taskManager2.addTask(new Task("Задача 3", "Описание",
+                LocalDateTime.of(2023, 5, 1, 9, 30),
+                Duration.ofMinutes(60)));
 
         Assertions.assertEquals(3, taskManager2.getTasks().size());
+    }
+
+    @Test
+    void openFileNotExist_createException() {
+        // Загрузка задач из файла
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            Managers.getFileBackedTaskManager("resources\\errorName.csv");
+        });
     }
 }
