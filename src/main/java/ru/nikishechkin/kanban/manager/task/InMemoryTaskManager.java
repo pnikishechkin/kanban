@@ -38,18 +38,6 @@ public class InMemoryTaskManager implements TaskManager {
         this.prioritizedTasks = new TreeSet<>(taskComparatorByDate);
         this.historyManager = historyManager;
     }
-/*
-    class TaskComparator implements Comparator<Task> {
-
-        @Override
-        public int compare(Task task1, Task task2) {
-            if (task1.getStartTime().isPresent() && task2.getStartTime().isPresent()) {
-                return task1.getStartTime().get().compareTo(task2.getStartTime().get());
-            }
-            return 1;
-        }
-    }
-*/
 
     /**
      * Получить множество, содержащее задачи, имеющие дату начала и отсортированные по ней
