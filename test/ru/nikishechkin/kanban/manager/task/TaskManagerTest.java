@@ -2,6 +2,8 @@ package ru.nikishechkin.kanban.manager.task;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import ru.nikishechkin.kanban.exceptions.NotFoundException;
+import ru.nikishechkin.kanban.exceptions.OverlapException;
 import ru.nikishechkin.kanban.manager.history.HistoryManager;
 import ru.nikishechkin.kanban.manager.history.InMemoryHistoryManager;
 import ru.nikishechkin.kanban.model.*;
@@ -55,9 +57,12 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
         Assertions.assertNotNull(taskManager.getEpicById(4), "Ошибка поиска эпика по идентификатору");
         Assertions.assertNotNull(taskManager.getEpicById(7), "Ошибка поиска эпика по идентификатору");
 
-        // В случае поиска эпика по идентификатору других типов задач, должен вернуть null
-        Assertions.assertNull(taskManager.getEpicById(1), "Ошибка поиска эпика по идентификатору");
-        Assertions.assertNull(taskManager.getEpicById(11), "Ошибка поиска эпика по идентификатору");
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            taskManager.getEpicById(1);
+        });
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            taskManager.getEpicById(11);
+        });
     }
 
     @Test
@@ -66,8 +71,9 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
         initData();
 
         // then
-        Assertions.assertNull(taskManager.getEpicById(1), "Ошибка поиска эпика по идентификатору");
-        Assertions.assertNull(taskManager.getEpicById(11), "Ошибка поиска эпика по идентификатору");
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            taskManager.getEpicById(1);
+        });
     }
 
     @Test
@@ -94,9 +100,12 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
         initData();
 
         // then
-        // В случае поиска подзадачи по идентификатору других типов задач, должен вернуть null
-        Assertions.assertNull(taskManager.getSubTaskById(0), "Ошибка поиска подзадачи по идентификатору");
-        Assertions.assertNull(taskManager.getSubTaskById(11), "Ошибка поиска подзадачи по идентификатору");
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            taskManager.getSubTaskById(0);
+        });
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            taskManager.getSubTaskById(11);
+        });
     }
 
     @Test
@@ -115,9 +124,12 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
         initData();
 
         // then
-        // В случае поиска задачи по идентификатору других типов задач, должен вернуть null
-        Assertions.assertNull(taskManager.getTaskById(0), "Ошибка поиска подзадачи по идентификатору");
-        Assertions.assertNull(taskManager.getTaskById(5), "Ошибка поиска подзадачи по идентификатору");
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            taskManager.getTaskById(0);
+        });
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            taskManager.getTaskById(5);
+        });
     }
 
     @Test
@@ -321,7 +333,8 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
 
         // Очистили все
         taskManager.clearTasks();
-        taskManager.clearSubTasks();;
+        taskManager.clearSubTasks();
+        ;
         taskManager.clearEpics();
 
         Assertions.assertEquals(3, taskManager.getHistory().size());
@@ -482,13 +495,16 @@ public abstract class TaskManagerTest<T extends InMemoryTaskManager> {
         Assertions.assertEquals(8, taskManager.getSubTasks().size());
 
         // when
-        taskManager.addTask(new Task("Задача новая", "Пересекается по датам с имеющейся",
-                LocalDateTime.of(2024, 10, 10, 12, 00),
-                Duration.ofMinutes(600)));
+        Assertions.assertThrows(OverlapException.class, () ->
+        {
+            taskManager.addTask(new Task("Задача новая", "Пересекается по датам с имеющейся",
+                    LocalDateTime.of(2024, 10, 10, 12, 00),
+                    Duration.ofMinutes(600)));
 
-        taskManager.addSubTask(new SubTask("Подзадача новая", "Пересекается по датам с уже имеющейся",
-                LocalDateTime.of(2024, 8, 1, 9, 20),
-                Duration.ofMinutes(60), 7));
+            taskManager.addSubTask(new SubTask("Подзадача новая", "Пересекается по датам с уже имеющейся",
+                    LocalDateTime.of(2024, 8, 1, 9, 20),
+                    Duration.ofMinutes(60), 7));
+        });
 
         taskManager.addSubTask(new SubTask("Подзадача новая", "Не пересекается по датам с имеющейся",
                 LocalDateTime.of(2025, 8, 1, 9, 30),
