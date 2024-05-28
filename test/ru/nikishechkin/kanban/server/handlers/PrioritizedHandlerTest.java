@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.server;
+package ru.nikishechkin.kanban.server.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import ru.nikishechkin.kanban.manager.Managers;
 import ru.nikishechkin.kanban.manager.task.TaskManager;
 import ru.nikishechkin.kanban.model.Task;
+import ru.nikishechkin.kanban.server.HttpTaskServer;
+import ru.nikishechkin.kanban.server.adapters.DurationTypeAdapter;
+import ru.nikishechkin.kanban.server.adapters.LocalDateTimeTypeAdapter;
 
 import java.io.IOException;
 import java.net.URI;

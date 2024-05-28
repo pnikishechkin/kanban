@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.server;
+package ru.nikishechkin.kanban.server.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,9 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nikishechkin.kanban.manager.Managers;
 import ru.nikishechkin.kanban.manager.task.TaskManager;
-import ru.nikishechkin.kanban.model.SubTask;
 import ru.nikishechkin.kanban.model.Task;
 import ru.nikishechkin.kanban.model.TaskStatus;
+import ru.nikishechkin.kanban.server.HttpTaskServer;
+import ru.nikishechkin.kanban.server.adapters.DurationTypeAdapter;
+import ru.nikishechkin.kanban.server.adapters.LocalDateTimeTypeAdapter;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,9 +28,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SubtaskHandlerTest {
+public class TaskHandlerTest {
 
     private HttpTaskServer server;
     private TaskManager manager;
@@ -43,8 +44,7 @@ public class SubtaskHandlerTest {
 
         // Загрузка менеджера задач из файла (для удобства тестирования)
         try {
-            Files.copy(Path.of("resources\\defaultTasks.csv"), Path.of("resources\\tasks.csv"),
-                    StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(Path.of("resources\\defaultTasks.csv"), Path.of("resources\\tasks.csv"), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,9 +69,9 @@ public class SubtaskHandlerTest {
     }
 
     @Test
-    public void getSubtasks_ReturnAllSubtasks() {
+    public void GetTasks_ReturnAllTasks() {
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = URI.create("http://localhost:8080/tasks");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -85,17 +85,17 @@ public class SubtaskHandlerTest {
             JsonElement jsonElement = JsonParser.parseString(response.body());
             assertTrue(jsonElement.isJsonArray());
 
-            List<SubTask> listSubtasks = gson.fromJson(jsonElement, new SubtaskListTypeToken().getType());
-            assertEquals(manager.getSubTasks(), listSubtasks);
+            List<Task> listTasks = gson.fromJson(jsonElement, new TaskListTypeToken().getType());
+            assertEquals(manager.getTasks(), listTasks);
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    public void getSubtaskById_Exist_ReturnCorrectSubtask() {
+    public void GetTaskById_Exist_ReturnCorrectTask() {
 
-        URI url = URI.create("http://localhost:8080/subtasks/1");
+        URI url = URI.create("http://localhost:8080/tasks/11");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -109,17 +109,17 @@ public class SubtaskHandlerTest {
             JsonElement jsonElement = JsonParser.parseString(response.body());
             assertTrue(jsonElement.isJsonObject());
 
-            SubTask subtask = gson.fromJson(jsonElement, SubTask.class);
-            assertEquals(manager.getSubTaskById(1), subtask);
+            Task task = gson.fromJson(jsonElement, Task.class);
+            assertEquals(manager.getTaskById(11), task);
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    public void getSubtaskById_NotExist_Error() {
+    public void GetTaskById_NotExist_Error() {
 
-        URI url = URI.create("http://localhost:8080/subtasks/40");
+        URI url = URI.create("http://localhost:8080/tasks/40");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -135,14 +135,14 @@ public class SubtaskHandlerTest {
     }
 
     @Test
-    public void addNewSubtask_SubtaskAdded() {
+    public void AddNewTask_TaskAdded() {
 
-        SubTask newSubtask = new SubTask("Подзадача НОВАЯ", "Описание",
+        Task newTask = new Task("Задача НОВАЯ", "Описание",
                 LocalDateTime.of(2029, 01, 02, 20, 30),
-                Duration.ofMinutes(10), 0);
-        String taskJson = gson.toJson(newSubtask);
+                Duration.ofMinutes(10));
+        String taskJson = gson.toJson(newTask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = URI.create("http://localhost:8080/tasks");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -152,8 +152,8 @@ public class SubtaskHandlerTest {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(201, response.statusCode(), "Некорректный код ответа");
-            assertEquals(9, manager.getSubTasks().size(), "Некорректное количество подзадач");
-            assertEquals(newSubtask.getName(), manager.getSubTasks().get(8).getName(), "Некорректное имя подзадачи");
+            assertEquals(3, manager.getTasks().size(), "Некорректное количество задач");
+            assertEquals(newTask.getName(), manager.getTasks().get(2).getName(), "Некорректное имя задачи");
 
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
@@ -161,14 +161,14 @@ public class SubtaskHandlerTest {
     }
 
     @Test
-    public void addNewSubtask_InteractError_SubtaskNotAdded() {
+    public void AddNewTask_InteractError_TaskNotAdded() {
 
-        SubTask newSubtask = new SubTask("Подзадача ПЕРЕСЕКАЮЩАЯСЯ", "Описание",
+        Task newTask = new Task("Задача ПЕРЕСЕКАЮЩАЯСЯ", "Описание",
                 LocalDateTime.of(2024, 9, 1, 9, 30),
-                Duration.ofMinutes(10), 0);
-        String taskJson = gson.toJson(newSubtask);
+                Duration.ofMinutes(10));
+        String taskJson = gson.toJson(newTask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = URI.create("http://localhost:8080/tasks");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -178,7 +178,7 @@ public class SubtaskHandlerTest {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(406, response.statusCode(), "Некорректный код ответа");
-            assertEquals(8, manager.getSubTasks().size(), "Некорректное количество подзадач");
+            assertEquals(2, manager.getTasks().size(), "Некорректное количество задач");
 
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
@@ -186,14 +186,14 @@ public class SubtaskHandlerTest {
     }
 
     @Test
-    public void editSubtask_CorrectParams_SubtaskEdited() {
+    public void EditTask_CorrectParamsTask_TaskEdited() {
 
-        SubTask editSubtask = new SubTask(1, "Подзадача ОБНОВЛЕННАЯ", "Описание", TaskStatus.NEW,
-                LocalDateTime.of(2024, 01, 01, 20, 30),
-                Duration.ofMinutes(10), 0);
-        String taskJson = gson.toJson(editSubtask);
+        Task editTask = new Task(11, "Задача ОБНОВЛЕННАЯ", "Описание", TaskStatus.NEW,
+                LocalDateTime.of(2029, 01, 02, 20, 30),
+                Duration.ofMinutes(10));
+        String taskJson = gson.toJson(editTask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = URI.create("http://localhost:8080/tasks");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -203,8 +203,8 @@ public class SubtaskHandlerTest {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(201, response.statusCode(), "Некорректный код ответа");
-            assertEquals(8, manager.getSubTasks().size(), "Некорректное количество подзадач");
-            assertEquals(editSubtask.getName(), manager.getSubTaskById(1).getName(), "Некорректное имя подзадачи");
+            assertEquals(2, manager.getTasks().size(), "Некорректное количество задач");
+            assertEquals(editTask.getName(), manager.getTaskById(11).getName(), "Некорректное имя задачи");
 
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
@@ -212,14 +212,14 @@ public class SubtaskHandlerTest {
     }
 
     @Test
-    public void editSubtask_InteractionsError_SubtaskNotEdited() {
+    public void EditTask_InteractionsError_TaskNotEdited() {
 
-        SubTask editSubtask = new SubTask(1, "Подзадача ОБНОВЛЕННАЯ", "Описание", TaskStatus.NEW,
+        Task editTask = new Task(11, "Задача ОБНОВЛЕННАЯ", "Описание", TaskStatus.NEW,
                 LocalDateTime.of(2024, 10, 10, 9, 30),
-                Duration.ofMinutes(10), 0);
-        String taskJson = gson.toJson(editSubtask);
+                Duration.ofMinutes(10));
+        String taskJson = gson.toJson(editTask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = URI.create("http://localhost:8080/tasks");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -229,8 +229,8 @@ public class SubtaskHandlerTest {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(406, response.statusCode(), "Некорректный код ответа");
-            assertEquals(8, manager.getSubTasks().size(), "Некорректное количество подзадач");
-            assertNotEquals(editSubtask.getName(), manager.getSubTaskById(1).getName(), "Некорректное имя подзадачи");
+            assertEquals(2, manager.getTasks().size(), "Некорректное количество задач");
+            assertNotEquals(editTask.getName(), manager.getTaskById(11).getName(), "Некорректное имя задачи");
 
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
@@ -238,14 +238,14 @@ public class SubtaskHandlerTest {
     }
 
     @Test
-    public void editSubtask_NotExist_Error() {
+    public void EditTask_NotExist_Error() {
 
         Task editTask = new Task(16, "Задача НЕ СУЩЕСТВУЮЩАЯ", "Описание", TaskStatus.NEW,
                 LocalDateTime.of(2024, 10, 10, 9, 30),
                 Duration.ofMinutes(10));
         String taskJson = gson.toJson(editTask);
 
-        URI url = URI.create("http://localhost:8080/subtasks");
+        URI url = URI.create("http://localhost:8080/tasks");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -255,7 +255,7 @@ public class SubtaskHandlerTest {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(404, response.statusCode(), "Некорректный код ответа");
-            assertEquals(2, manager.getTasks().size(), "Некорректное количество подзадач");
+            assertEquals(2, manager.getTasks().size(), "Некорректное количество задач");
 
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
@@ -263,9 +263,9 @@ public class SubtaskHandlerTest {
     }
 
     @Test
-    public void deleteSubtask_Exist_SubtaskDeleted() {
+    public void DeleteTask_Exist_TaskDeleted() {
 
-        URI url = URI.create("http://localhost:8080/subtasks/1");
+        URI url = URI.create("http://localhost:8080/tasks/11");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -275,16 +275,16 @@ public class SubtaskHandlerTest {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(201, response.statusCode(), "Некорректный код ответа");
-            assertEquals(7, manager.getSubTasks().size(), "Некорректное количество подзадач");
+            assertEquals(1, manager.getTasks().size(), "Некорректное количество задач");
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    public void deleteSubtask_NotExist_Error() {
+    public void DeleteTask_NotExist_Error() {
 
-        URI url = URI.create("http://localhost:8080/subtasks/404");
+        URI url = URI.create("http://localhost:8080/tasks/404");
         HttpRequest request = HttpRequest
                 .newBuilder()
                 .uri(url)
@@ -294,10 +294,9 @@ public class SubtaskHandlerTest {
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             assertEquals(404, response.statusCode(), "Некорректный код ответа");
-            assertEquals(8, manager.getSubTasks().size(), "Некорректное количество подзадач");
+            assertEquals(2, manager.getTasks().size(), "Некорректное количество задач");
         } catch (IOException | InterruptedException e) { // обрабатываем ошибки отправки запроса
             throw new RuntimeException(e);
         }
     }
-
 }

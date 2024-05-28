@@ -1,26 +1,25 @@
-package ru.nikishechkin.kanban.server;
+package ru.nikishechkin.kanban.server.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.nikishechkin.kanban.manager.task.TaskManager;
-import ru.nikishechkin.kanban.model.Task;
+import ru.nikishechkin.kanban.server.adapters.DurationTypeAdapter;
+import ru.nikishechkin.kanban.server.adapters.LocalDateTimeTypeAdapter;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
-public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
+public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
 
-    public HistoryHandler(TaskManager taskManager) {
+    public PrioritizedHandler(TaskManager taskManager) {
         super(taskManager);
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-
         String[] uri = exchange.getRequestURI().getPath().split("/");
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
@@ -30,7 +29,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
             if (uri.length == 2) {
                 if (exchange.getRequestMethod().equals("GET")) {
                     // Возврат истории просмотра задач
-                    sendText(exchange, gson.toJson(taskManager.getHistory()));
+                    sendText(exchange, gson.toJson(taskManager.getPrioritizedTasks()));
                 } else {
                     sendResponse(exchange, "Ошибка в запросе", 404);
                 }

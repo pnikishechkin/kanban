@@ -1,17 +1,12 @@
 package ru.nikishechkin.kanban.server;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import ru.nikishechkin.kanban.manager.Managers;
 import ru.nikishechkin.kanban.manager.task.TaskManager;
+import ru.nikishechkin.kanban.server.handlers.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;

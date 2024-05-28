@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.server;
+package ru.nikishechkin.kanban.server.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import ru.nikishechkin.kanban.manager.task.TaskManager;

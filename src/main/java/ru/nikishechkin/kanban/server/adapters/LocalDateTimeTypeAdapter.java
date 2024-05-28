@@ -1,4 +1,4 @@
-package ru.nikishechkin.kanban.server;
+package ru.nikishechkin.kanban.server.adapters;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
