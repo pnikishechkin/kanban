@@ -141,15 +141,6 @@ public class EpicHandlerTest {
 
         Epic newEpic = new Epic("Эпик НОВЫЙ", "Описание");
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Если не задать данные параметры, то при конвертации объекта в Json вылетает NullPointerException
-        // Как этого избежать?
-        newEpic.setStartTime(LocalDateTime.of(2050, 01, 02, 20, 30));
-        newEpic.setEndTime(LocalDateTime.of(2050, 01, 02, 20, 40));
-        newEpic.setDuration(Duration.ofMinutes(10));
-        newEpic.setStatus(TaskStatus.NEW);
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
         String taskJson = gson.toJson(newEpic);
 
         URI url = URI.create("http://localhost:8080/epics");
