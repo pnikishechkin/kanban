@@ -184,18 +184,18 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
                 LocalDateTime.of(2023, 5, 1, 9, 30),
                 Duration.ofMinutes(60),
                 taskManager.getEpics().get(0).getId()));
-        taskManager.addSubTask(new SubTask("Подзадача 3_2", "Описание", LocalDateTime.of(2023, 5, 1, 9, 30),
+        taskManager.addSubTask(new SubTask("Подзадача 3_2", "Описание", LocalDateTime.of(2025, 5, 1, 9, 30),
                 Duration.ofMinutes(60),
                 taskManager.getEpics().get(0).getId()));
-        taskManager.addSubTask(new SubTask("Подзадача 3_3", "Описание", LocalDateTime.of(2023, 5, 1, 9, 30),
+        taskManager.addSubTask(new SubTask("Подзадача 3_3", "Описание", LocalDateTime.of(2026, 5, 1, 9, 30),
                 Duration.ofMinutes(60),
                 taskManager.getEpics().get(0).getId()));
 
         taskManager.addTask(new Task("Задача 1", "Описание",
-                LocalDateTime.of(2023, 5, 1, 9, 30),
+                LocalDateTime.of(2023, 8, 1, 9, 30),
                 Duration.ofMinutes(60)));
         taskManager.addTask(new Task("Задача 2", "Описание",
-                LocalDateTime.of(2023, 5, 1, 9, 30),
+                LocalDateTime.of(2023, 9, 1, 9, 30),
                 Duration.ofMinutes(60)));
 
         Assertions.assertEquals(1, taskManager.getEpics().size());
@@ -208,7 +208,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         Assertions.assertEquals(2, taskManager2.getTasks().size());
 
         taskManager2.addTask(new Task("Задача 3", "Описание",
-                LocalDateTime.of(2023, 5, 1, 9, 30),
+                LocalDateTime.of(2029, 5, 1, 9, 30),
                 Duration.ofMinutes(60)));
 
         Assertions.assertEquals(3, taskManager2.getTasks().size());

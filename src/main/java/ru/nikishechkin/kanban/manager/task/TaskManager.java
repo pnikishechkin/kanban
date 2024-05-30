@@ -6,6 +6,7 @@ import ru.nikishechkin.kanban.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 public interface TaskManager {
     ArrayList<Epic> getEpics();
@@ -45,6 +46,7 @@ public interface TaskManager {
     void deleteTask(int id);
 
     ArrayList<SubTask> getListEpicSubTasks(int epicId);
+    TreeSet<Task> getPrioritizedTasks();
 
     List<Task> getHistory();
 }

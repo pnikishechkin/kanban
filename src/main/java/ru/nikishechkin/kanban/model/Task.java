@@ -105,7 +105,10 @@ public class Task {
 
     @Override
     public String toString() {
-        return id + "," + type.toString() + "," + name + "," + status.toString() + "," + description + "," +
+        return (id != null ? id : "-") + "," +
+                (type != null ? type.toString() : "-") + "," + name + "," +
+                (status != null ? status.toString() : "-") + "," + description +
+                "," +
                 (startTime.isPresent() ? startTime.get() : "-") + "," + duration.toMinutes();
     }
 
